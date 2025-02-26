@@ -1,9 +1,16 @@
+"""
+Resolver u''(x) = 1 - x, x ∈ (0, 3),
+u(0) = u(3) = 0.
+"""
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy import linalg, integrate, sparse
 import colorsys
 from typing import Callable
 import time
+
+f: Callable[[np.floating], float | np.floating] = lambda x : 1 - x
+sol: Callable[[np.floating], np.floating] = lambda x : integrate.quad(lambda t: f(t)*(x-t), 0, x)[0] - (x / 3.0) * integrate.quad(lambda t : f(t)*(3-t), 0, 3)[0] #x*(x-3)**2 / 6.0
 
 def method_matrix(n: int) -> np.ndarray:
     start = time.process_time()
@@ -12,7 +19,6 @@ def method_matrix(n: int) -> np.ndarray:
     np.fill_diagonal(A[1:], 1)
     np.fill_diagonal(A[:, 1:], 1)
     cputime = time.process_time() - start
-    print(f"Took {cputime} seconds to create matrix of order {n}")
     return A
 
 def method(n: int, f:Callable[[np.floating], float | np.floating], a:float, b:float) -> list[np.ndarray]:
@@ -29,41 +35,58 @@ def method(n: int, f:Callable[[np.floating], float | np.floating], a:float, b:fl
     fn = np.insert(fn, n + 1, 0)
 
     return [x, fn]
-    #color1 = colorsys.hsv_to_rgb(35 / 360.0, 0.3 , 1)#@0.3 + 0.7 * (1 - (1.0 * diff1 / first_diff1)), 1)
-    #plt.plot(x, fn, label=f'n={n}', color = color1)
 
-fig, (ax1, ax2) = plt.subplots(1, 2)
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.serif": ["Computer Modern Roman"],
+    "font.size": 12
+})
 
-f: Callable[[np.floating], float | np.floating] = lambda x : x ** 7
-sol: Callable[[np.floating], np.floating] = lambda x : integrate.quad(lambda t: f(t)*(x-t), 0, x)[0] - x*integrate.quad(lambda t : f(t)*(3-t), 0, 3)[0] #x*(x-3)**2 / 6.0
+fig, axes = plt.subplot_mosaic([['solution', 'solution'], ['error,', 'time']])
+fig.suptitle(r" Aproximación de la solución de $u''(x) = 1 - x, x \in (0, 3)$, $u(0) = u(3) = 0$")
+ax1 = fig.axes[0]
+ax1.title.set_text(r'Aproximación $u_n$ vs. solución $u(x) = \frac{1}{6}x(x-3)^2$')
+ax1.set_xlabel(r'$x$')
+ax1.set_ylabel(r'$u(x)$')
+
+ax2 = fig.axes[1]
+ax2.title.set_text('Error')
+ax2.set_xlabel(r'$h = \frac{1}{n}$')
+ax2.set_ylabel(r'$\max \|u(x) - u_n(x)\|_{\infty}$')
+
+ax3 = fig.axes[2]
+ax3.title.set_text('Tiempo de CPU')
+ax3.set_xlabel(r'$n$')
+ax3.set_ylabel(r'$t (s)$')
 
 # draw axes
-ax1.axhline(0, color='black', lw=0.5)
-ax1.axvline(0, color='black', lw=0.5)
-ax2.axhline(0, color='black', lw=0.5)
-ax2.axvline(0, color='black', lw=0.5)
-
+for ax in axes.values():
+    ax.axhline(0, color='black', lw=0.5)
+    ax.axvline(0, color='black', lw=0.5)
 
 left_v  = 0
 right_v = 3
 
-for i, n in enumerate([5, 10, 20, 50, 100, 500, 1000]):
+iters = [5, 10, 20, 50, 100, 500, 1000]
+for i, n in enumerate(iters):
     start = time.process_time()
     x, y = method(n, f, left_v, right_v)
     cputime = time.process_time() - start
-    print(f"Took {cputime} seconds to solve the problem")
 
-    color1 = colorsys.hsv_to_rgb(35 / 360.0, ((i + 1) /9.0) ** (0.5) , 1)
-    ax1.plot(x, y, label=f'n={n}', color = color1)
+    color1 = colorsys.hsv_to_rgb(35 / 360.0, ((i + 1) / (len(iters)+1)) ** (0.5) , 1)
+    ax1.plot(x, y, label=rf'$u_{{{n}}}$', color = color1)
 
     error = np.max(np.abs(y - [sol(i) for i in x]))
-    ax2.plot(n, error, 'o', color = 'blue')
+    ax2.plot(1.0 / n, error, 'o-', color = 'blue')
+    ax3.plot(n, cputime, 'o-', color = 'red')
+
 
 
 x = np.linspace(left_v, right_v, 100)
 y = [sol(i) for i in x]
-color1 = colorsys.hsv_to_rgb(35 / 360.0, 1, 1)
-ax1.plot(x, y, label='solution', color = color1)
+color1 = colorsys.hsv_to_rgb(35 / 360.0, 1 , 1)
+ax1.plot(x, y, label='solución', color = color1)
 
 ax1.legend()
 ax2.legend()
