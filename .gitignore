@@ -1,2 +1,5 @@
 .venv
 .vscode
+*.rar
+*.zip
+*.tar.gz
