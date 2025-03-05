@@ -13,20 +13,20 @@ import time
 # Definición de las funciones f y solución.
 f: Callable[[np.floating], float | np.floating] = lambda x : 3
 #sol: Callable[[np.floating], np.floating] = lambda x : integrate.quad(lambda t: f(t)*(x-t), 0, x)[0] - (x / 3.0) * integrate.quad(lambda t : f(t)*(3-t), 0, 3)[0]
-sol: Callable[[np.floating], np.floating] = lambda x : 1.0 / 2 * (x**2) + 3.0 / 2
+sol: Callable[[np.floating], np.floating] = lambda x : 3.0 / 2 * (x**2) + 1.0 / 2
+
 # Obtención de la matriz (sparse.csr_matrix) para n arbitrario.
 def method_matrix(n: int) -> sparse.csr_matrix:
     diagonals = [-2 * np.ones(n), np.ones(n - 1), np.ones(n - 1)]
     offsets = [0, -1, 1]
     A = sparse.diags(diagonals, offsets, format='csr')
     A[0, 0] = -1
-    print(A.toarray())
     return A
 
 # Método de diferencias finitas para resolver el problema de contorno.
 def method(n: int, f: Callable[[np.floating], float | np.floating], a: float, b: float, alpha: float = 0, beta: float = 0) -> list[np.ndarray]:
     x = np.linspace(a, b, n + 2)
-    xx = x[0:-1]
+    xx = x[1:-1]
 
     y = [f(i) for i in xx]
     h = xx[1] - xx[0]
@@ -35,7 +35,8 @@ def method(n: int, f: Callable[[np.floating], float | np.floating], a: float, b:
     L = (1 / h)**2 * method_matrix(n)
     
     fn = linalg.spsolve(L, y)
-    fn = np.insert(fn, n + 1, beta)
+    fn = np.insert(fn, 0, fn[0])
+    fn = np.insert(fn, len(fn), beta)
 
     return [x, fn]
 
@@ -47,9 +48,9 @@ plt.rcParams.update({
 })
 
 fig, axes = plt.subplot_mosaic([['solution', 'solution'], ['solution', 'solution'], ['error,', 'time']])
-fig.suptitle(r" Aproximación de la solución de $u''(x) = 1 - x, x \in (0, 3)$, $u(0) = u(3) = 0$")
+fig.suptitle(r" Aproximación de la solución de $u''(x) = 3 , x \in (0, 1)$, $u'(0) = 0$ y $u(1) = 2$")
 ax1 = fig.axes[0]
-ax1.title.set_text(r'Aproximación $u_N$ vs. solución $u(x) = \frac{x^2}{2}-\frac{x^3}{6}$')
+ax1.title.set_text(r'Aproximación $u_N$ vs. solución $u(x) = \frac{3x^2}{2}-\frac{1}{2}$')
 ax1.set_xlabel(r'$x$')
 ax1.set_ylabel(r'$u(x)$')
 
@@ -72,7 +73,7 @@ for ax in axes.values():
 left_v  = 0
 right_v = 1
 
-iters = [5, 10, 20, 50, 100, 500, 1000]
+iters = [5, 10, 20, 50, 100, 500, 1000, 10000, 20000]
 cputime, error, cputime_old, error_old, n_old = 0, 0, 0, 0, -1
 for i, n in enumerate(iters):
     start = time.perf_counter()

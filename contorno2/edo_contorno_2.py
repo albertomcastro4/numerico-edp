@@ -14,6 +14,7 @@ import time
 f: Callable[[np.floating], float | np.floating] = lambda x : 3
 #sol: Callable[[np.floating], np.floating] = lambda x : integrate.quad(lambda t: f(t)*(x-t), 0, x)[0] - (x / 3.0) * integrate.quad(lambda t : f(t)*(3-t), 0, 3)[0]
 sol: Callable[[np.floating], np.floating] = lambda x : 3.0 / 2 * (x**2) - 7.0 / 2 * (x) + 1
+
 # Obtención de la matriz (sparse.csr_matrix) para n arbitrario.
 def method_matrix(n: int) -> sparse.csr_matrix:
     diagonals = [-2 * np.ones(n), np.ones(n - 1), np.ones(n - 1)]
@@ -47,9 +48,9 @@ plt.rcParams.update({
 })
 
 fig, axes = plt.subplot_mosaic([['solution', 'solution'], ['solution', 'solution'], ['error,', 'time']])
-fig.suptitle(r" Aproximación de la solución de $u''(x) = 1 - x, x \in (0, 3)$, $u(0) = u(3) = 0$")
+fig.suptitle(r" Aproximación de la solución de $u''(x) = 3, x \in (0, 1)$, $u(0) = -1$ y $u(1) = 1$")
 ax1 = fig.axes[0]
-ax1.title.set_text(r'Aproximación $u_N$ vs. solución $u(x) = \frac{x^2}{2}-\frac{x^3}{6}$')
+ax1.title.set_text(r'Aproximación $u_N$ vs. solución $u(x) = \frac{3}{2}x^2-\frac{7}{2}+1$')
 ax1.set_xlabel(r'$x$')
 ax1.set_ylabel(r'$u(x)$')
 
