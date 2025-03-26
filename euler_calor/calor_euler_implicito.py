@@ -38,11 +38,11 @@ def method(n: int, m: int, init_cond: function_t, a: float = 0, b: float = 1, t_
     h = x[1] - x[0]
     k = 1 / m
 
-    L = (k / h**2) * method_matrix(n - 1)
+    L = np.identity(n-1) - (k / h**2) * method_matrix(n - 1)
     u = u0
     uu = [np.concatenate(([0], u0, [0]))]
     for _ in range(1, m):
-        u = u +  L @ u
+        u = linalg.spsolve(L, u)
         uu.append(np.concatenate(([0], u, [0])))
 
     xxx, ttt = np.meshgrid(x, tt)
