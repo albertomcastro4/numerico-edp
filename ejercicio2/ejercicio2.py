@@ -4,14 +4,14 @@ import numpy as np
 import shutil
 from matplotlib import pyplot as plt
 from scipy import integrate, sparse
-from scipy.sparse import linalg
 from typing import Callable
 
 constant_t    = float | np.floating
 function_t    = Callable[[constant_t], constant_t]
+function2_t   = Callable[[constant_t, constant_t], constant_t]
 
 # Creación de la matriz a partir de las diagonales.
-def method_matrix(n: int, diag_main: np.ndarray, diag_lu: np.ndarray) -> sparse.csr_matrix:
+def method_matrix(n: int, diag_main: np.ndarray, diag_lu: np.ndarray) -> sparse.dia_matrix:
     diagonals = [diag_main, diag_lu, diag_lu]
     offsets = [0, -1, 1]
     A = sparse.diags(diagonals, offsets, format='csr')
@@ -31,7 +31,7 @@ def method(n: int, a_func: function_t , f: function_t, a: float, b: float) -> li
     # (L+B), con B = -I
     L = (1 / h)**2 * method_matrix(n - 1, np.array(diag_main), np.array(diag_lu)) - sparse.identity(n - 1, format='csr')
     
-    y = linalg.spsolve(L, y)
+    y = sparse.linalg.spsolve(L, y)
     y = np.insert(y, 0, 0)
     y = np.insert(y, n, 0)
 
@@ -68,10 +68,10 @@ for ax in axes.values():
 left_v  = 0
 right_v = 1
 
-a    : function_t = lambda x      : 2 - x
-f_x0 : function_t = lambda x, x_0 : -np.exp(-20*(x - x_0)**2)
-f_1  : function_t = lambda x      : f_x0(x, 0.5)
-f_2  : function_t = lambda x      : f_x0(x, 0.9)
+a    : function_t  = lambda x      : 2 - x
+f_x0 : function2_t = lambda x, x_0 : -np.exp(-20*(x - x_0)**2)
+f_1  : function_t  = lambda x      : f_x0(x, 0.5)
+f_2  : function_t  = lambda x      : f_x0(x, 0.9)
 
 
 # Resolución del problema
