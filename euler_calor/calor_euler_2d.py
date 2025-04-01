@@ -42,11 +42,7 @@ def method(n: int, m: int, init_cond: function2_t, a: float = 0, b: float = 1, t
     h = xx[1] - xx[0]
     k = 1 / m
 
-    t = np.linspace(t_0, t_1, m + 1)
-    tt = t[:-1]
-
-    print(np.shape(method_matrix(n-1)))
-    L = np.identity((n-1)**2) - (k / h**2) * method_matrix(n)
+    L = sparse.identity((n-1)**2) - (k / h**2) * method_matrix(n)
     u = u0
     uu = []
     for _ in range(1, m):
@@ -79,16 +75,17 @@ right_v = np.pi/2
 
 iters = [(50, 100)]
 cputime, error, cputime_old, error_old, n_old = 0, 0, 0, 0, -1
-
+z
 for i, (n, m) in enumerate(iters):
-    x, y, z = method(n, m, u_0, left_v, right_v, 0, 10)
+    x, y, z = method(n, m, u_0, left_v, right_v, 0, 1)
     max_z = np.max(z)
     min_z = np.min(z)
-    for plot in z:
-        ax1.clear()
-        ax1.plot_surface(x, y, plot, cmap=cm.viridis, alpha=0.5)
-        ax1.set_zlim(min_z, max_z)
-        plt.pause(0.1)
+    while True:
+        for plot in z:
+            ax1.clear()
+            ax1.plot_surface(x, y, plot, cmap=cm.viridis, alpha=0.5)
+            ax1.set_zlim(min_z, max_z)
+            plt.pause(0.1)
 
 
 ax1.legend()

@@ -18,7 +18,7 @@ function_t  = Callable[[constant_t], constant_t]
 function2_t = Callable[[constant_t, constant_t], constant_t]
 
 # Definición de las funciones u_0.
-u_0: function_t = lambda x : -(x-1)*np.sin(2*np.pi*x)
+u_0: function_t = lambda x : -(x-1)
 
 # Obtención de la matriz (sparse.csr_matrix) para n arbitrario.
 def method_matrix(n: int) -> sparse.csr_matrix:
@@ -72,7 +72,7 @@ for i, (n, m) in enumerate(iters):
     x, y, z = method(n, m, u_0, left_v, right_v, 0, 1)
 
     
-    for j in range(0, m, 100):
+    for j in range(0, m, int(m / 10)):
         color1 = colorsys.hsv_to_rgb(35 / 360.0, 1.0, 1.0)
         ax1.plot(x[j], y[j], z[j], color=color1, linewidth=3)
         #plt.pause(0.1)
